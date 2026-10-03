@@ -7,7 +7,8 @@ on:
       - 'android/**'
       - 'src/client.html'
       - 'build.py'
-      - 'tests/**'
+      - 'tests/api_test.py'
+      - 'tests/android_smoke.sh'
       - '.github/workflows/android.yml'
   workflow_dispatch:
 

@@ -12,3 +12,4 @@ android/.idea/
 .DS_Store
 android/keys/
 android/app/skytalk-release.p12
+tests/emu-results*/

@@ -4,9 +4,10 @@
 방장 한 명의 노트북(또는 안드로이드폰)이 작은 Wi-Fi와 채팅방을 만들고, 나머지 팀원은 그 Wi-Fi에 연결해 **휴대폰 브라우저로** 들어옵니다. 앱 설치·회원가입·인터넷·데이터가 모두 필요 없고, 아이폰도 그대로 쓸 수 있습니다.
 
 <p align="center">
-  <img src="docs/img/chat.png" width="250" alt="채팅 화면">
-  <img src="docs/img/invite.png" width="250" alt="팀원 초대 화면">
-  <img src="docs/img/offline.png" width="250" alt="연결이 끊겼을 때">
+  <img src="docs/img/chat.webp" width="250" alt="채팅 화면">
+  <img src="docs/img/invite.webp" width="250" alt="팀원 초대 화면">
+  <img src="docs/img/offline.webp" width="250" alt="연결이 끊겼을 때">
+  <img src="docs/img/app-host.webp" width="250" alt="안드로이드 방장 화면">
 </p>
 
 > 사용 안내 페이지(휴대폰으로 보기 좋음): **https://songlomin.github.io/skytalk/**

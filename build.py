@@ -85,9 +85,15 @@ def main():
         "SKYTALK_SSID, SKYTALK_PASS 를 고치세요. (비밀번호 8자 이상)\r\n\r\n"
         "자세한 안내: https://songlomin.github.io/skytalk/\r\n"
     )
-    with zipfile.ZipFile(DIST / "SkyTalk-Windows.zip", "w", zipfile.ZIP_DEFLATED) as z:
-        z.write(DIST / "SkyTalk-Windows.bat", "SkyTalk/SkyTalk-Windows.bat")
-        z.writestr("SkyTalk/README-KO.txt", "﻿" + readme)
+    def entry(name):  # 같은 내용이면 zip도 똑같이 나오도록 시각을 고정
+        info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
+        info.compress_type = zipfile.ZIP_DEFLATED
+        info.external_attr = 0o644 << 16
+        return info
+
+    with zipfile.ZipFile(DIST / "SkyTalk-Windows.zip", "w") as z:
+        z.writestr(entry("SkyTalk/SkyTalk-Windows.bat"), (DIST / "SkyTalk-Windows.bat").read_bytes())
+        z.writestr(entry("SkyTalk/README-KO.txt"), ("﻿" + readme).encode("utf-8"))
 
     shutil.copyfile(SRC / "client.html", DIST / "client.html")
     if ANDROID_ASSETS.parent.exists():
