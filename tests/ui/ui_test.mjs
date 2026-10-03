@@ -1,7 +1,7 @@
 // 기내톡 화면 테스트: 실제 브라우저(Edge, 헤드리스)로 휴대폰 3대를 흉내 냅니다.
 //   node ui_test.mjs python     (dist/skytalk.py)
 //   node ui_test.mjs windows    (dist/SkyTalk-Windows.bat 의 PowerShell 본문)
-import { chromium } from 'playwright';
+import { chromium, webkit } from 'playwright';
 import jsQR from 'jsqr';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
@@ -13,13 +13,14 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..', '..');
 const DIST = path.join(ROOT, 'dist');
 const kind = process.argv[2] || 'python';
-const SHOTS = path.join(HERE, 'shots', kind);
+const engine = process.env.ENGINE || 'edge';   // edge | webkit(사파리 엔진)
+const SHOTS = path.join(HERE, 'shots', kind + (engine === 'webkit' ? '-webkit' : ''));
 fs.mkdirSync(SHOTS, { recursive: true });
 const fails = [];
 const check = (c, what) => { console.log((c ? '  ok   ' : '  FAIL ') + what); if (!c) fails.push(what); };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-const port = kind === 'python' ? 18380 : 18480;
+const port = (kind === 'python' ? 18380 : 18480) + (process.env.ENGINE === 'webkit' ? 7 : 0);
 const data = fs.mkdtempSync(path.join(os.tmpdir(), 'skytalk-ui-'));
 let server = null, base = '';
 
@@ -85,7 +86,8 @@ async function main() {
   startServer();
   if (!await waitUp()) throw new Error('server did not start');
   console.log(`== ${kind} server at ${base}`);
-  const browser = await chromium.launch({ channel: 'msedge', headless: true });
+  const browser = engine === 'webkit' ? await webkit.launch({ headless: true }) : await chromium.launch({ channel: 'msedge', headless: true });
+  console.log('== browser: ' + engine + ' ' + browser.version());
   const ctxA = await browser.newContext(phone(390, 844));
   const ctxB = await browser.newContext(phone(412, 915));
   const ctxC = await browser.newContext(phone(390, 844));
@@ -93,7 +95,7 @@ async function main() {
   const errors = [];
   for (const [n, p] of [['A', A], ['B', B], ['C', C]]) {
     p.on('pageerror', e => errors.push(n + ': ' + e.message));
-    p.on('console', msg => { if (msg.type() === 'error' && !/Failed to load resource|net::ERR/.test(msg.text())) errors.push(n + ' console: ' + msg.text()); });
+    p.on('console', msg => { if (msg.type() === 'error' && !/Failed to load resource|net::ERR|Viewport argument key "interactive-widget"/.test(msg.text())) errors.push(n + ' console: ' + msg.text()); });
   }
 
   // 첫 화면 (프로필)
