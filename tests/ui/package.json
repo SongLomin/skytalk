@@ -1,0 +1,1 @@
+{"name":"skytalk-ui-tests","private":true,"type":"module","dependencies":{"jsqr":"^1.4.0","playwright":"^1.63.0"}}
