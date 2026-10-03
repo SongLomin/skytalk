@@ -252,7 +252,10 @@ def run_timeout(base):
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "python"
     if mode == "url":
-        run_suite(sys.argv[2].rstrip("/"))
+        base = sys.argv[2].rstrip("/")
+        print("== server at %s" % base)
+        run_suite(base)
+        run_timeout(base)
     else:
         tmp = tempfile.mkdtemp(prefix="skytalk-test-")
         data = os.path.join(tmp, "data")

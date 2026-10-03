@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sky_bg">#FF121418</color>
+    <color name="sky_surface">#FF1A1D23</color>
+    <color name="icon_bg">#FFA8C6E6</color>
+
+    <style name="Theme.SkyTalk" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/sky_bg</item>
+        <item name="android:statusBarColor">@color/sky_surface</item>
+        <item name="android:navigationBarColor">@color/sky_surface</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

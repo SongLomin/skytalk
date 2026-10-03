@@ -1,0 +1,56 @@
+plugins {
+    id 'com.android.application'
+}
+
+def releaseKey = file('skytalk-release.p12')
+def keyPass = System.getenv('SKYTALK_KEY_PASS') ?: ''
+
+android {
+    namespace 'io.github.songlomin.skytalk'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'io.github.songlomin.skytalk'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1.0.0'
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    signingConfigs {
+        release {
+            if (releaseKey.exists()) {
+                storeFile releaseKey
+                storePassword keyPass
+                keyAlias 'skytalk'
+                keyPassword keyPass
+                storeType 'pkcs12'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig releaseKey.exists() ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

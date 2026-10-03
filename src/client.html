@@ -196,6 +196,7 @@ body.kb .composer{padding-bottom:8px}
       <li><button type="button" id="mTheme">화면 테마 <em id="mThemeVal"></em></button></li>
       <li><button type="button" id="mExport">대화 내용 저장 (.txt) <em>›</em></button></li>
       <li><button type="button" id="mClear">이 기기의 대화 기록 지우기 <em>›</em></button></li>
+      <li id="mAppWrap" hidden><button type="button" id="mApp">앱 처음 화면 (방 닫기·나가기) <em>›</em></button></li>
     </ul>
     <p class="hint" id="mAbout" style="margin:12px 2px 0"></p>
     <button class="btn ghost" type="button" data-close>닫기</button>
@@ -253,6 +254,8 @@ const S = {
 };
 if (!Array.isArray(S.pending)) S.pending = [];
 const prefs = { sound: store.get('sound', true), theme: store.get('theme', 'dark') };
+const APP = window.SkyTalkApp || null;   // 안드로이드 기내톡 앱 안에서 열렸을 때만 있음
+function reportProfile() { if (APP && APP.onProfile) { try { APP.onProfile(me.uid, me.name, me.seat, location.origin); } catch (e) {} } }
 const cache = store.get('cache', null);
 if (cache && cache.sid && cache.sid === S.sid && Array.isArray(cache.msgs)) {
   S.msgs = cache.msgs; S.lastId = S.msgs.length ? S.msgs[S.msgs.length - 1].id : 0;
@@ -634,7 +637,7 @@ $('#pfForm').addEventListener('submit', e => {
   me.name = name; me.seat = cleanSeat($('#pfSeat').value);
   store.set('name', me.name); store.set('seat', me.seat);
   hide('#dlgProfile'); input.blur();
-  renderAll(); kickPoll(); flushOutbox(); refreshMenu();
+  renderAll(); kickPoll(); flushOutbox(); refreshMenu(); reportProfile();
 });
 $('#pfName').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); $('#pfSeat').focus(); } });
 
@@ -673,10 +676,12 @@ function exportChat() {
     if (m.kind === 'sys') { lines.push('  · ' + m.text); continue; }
     lines.push('[' + fmtTime(m.ts) + '] ' + (m.name || '?') + (m.seat ? '(' + m.seat + ')' : '') + ': ' + (m.img ? '[사진] ' : '') + (m.text || ''));
   }
-  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a'); const d = new Date();
-  const pad = n => String(n).padStart(2, '0');
-  a.download = '기내톡-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.txt';
+  const d = new Date(), pad = n => String(n).padStart(2, '0');
+  const fname = '기내톡-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.txt';
+  if (APP && APP.saveText) { APP.saveText(fname, lines.join('\r\n')); return; }
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.download = fname;
   a.href = URL.createObjectURL(blob); document.body.append(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
   toast('대화 내용을 파일로 저장했어요');
@@ -868,7 +873,8 @@ window.addEventListener('online', kickPoll);
 window.addEventListener('pageshow', e => { if (e.persisted) kickPoll(); });
 setInterval(() => { renderPeople(); }, 15000);
 
-applyTheme(); fit(); renderAll(); scrollBottom(); updateTitle(); refreshMenu();
+if (APP) { $('#mAppWrap').hidden = false; $('#mApp').addEventListener('click', () => { try { APP.goHome(); } catch (e) {} }); }
+applyTheme(); fit(); renderAll(); scrollBottom(); updateTitle(); refreshMenu(); reportProfile();
 if (!me.name) openProfile(true);
 pollLoop();
 loadInfo().then(refreshMenu);

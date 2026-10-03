@@ -10,3 +10,5 @@ android/local.properties
 android/.idea/
 *.iml
 .DS_Store
+android/keys/
+android/app/skytalk-release.p12
