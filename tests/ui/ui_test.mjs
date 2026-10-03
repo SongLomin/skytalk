@@ -216,7 +216,17 @@ async function main() {
   // 노트북(호스트) 화면 크기
   const ctxD = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: 'ko-KR', timezoneId: 'Asia/Seoul' });
   const D = await ctxD.newPage();
-  await join(D, '호스트', '');
+  await D.goto(base + '/');
+  await D.waitForSelector('#dlgProfile:not([hidden])');
+  check(await D.evaluate(() => document.getElementById('app').inert === true), 'screen behind an open dialog is locked (inert)');
+  await D.focus('#pfName');
+  await D.keyboard.type('호스트');
+  await D.keyboard.press('Enter');
+  check(await D.evaluate(() => document.activeElement && document.activeElement.id === 'pfSeat'), 'Enter in the name field moves to the seat field');
+  await D.keyboard.type('1a');
+  await D.keyboard.press('Enter');
+  check(await D.waitForSelector('#dlgProfile', { state: 'hidden', timeout: 4000 }).then(() => true, () => false), 'Enter in the seat field starts the chat');
+  check(await D.evaluate(() => document.getElementById('app').inert === false), 'screen is usable again after the dialog closes');
   await sleep(800);
   await D.screenshot({ path: path.join(SHOTS, '8-desktop.png') });
 

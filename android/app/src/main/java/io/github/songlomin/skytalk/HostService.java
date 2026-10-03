@@ -201,8 +201,10 @@ public class HostService extends Service {
             title = "기내톡 방을 열지 못했어요";
             text = serverError;
         } else if ("on".equals(p2pState)) {
+            String ip = "192.168.49.1";
+            for (String a : Net.localIPv4()) { if (a.startsWith("192.168.49.")) { ip = a; break; } }
             title = "기내톡 방이 열려 있어요";
-            text = "Wi-Fi " + ssid + " · 비밀번호 " + pass + "\n주소 http://192.168.49.1:" + server.port();
+            text = "Wi-Fi " + ssid + " · 비밀번호 " + pass + "\n주소 http://" + ip + ":" + server.port();
         } else if ("starting".equals(p2pState)) {
             title = "기내톡 방 준비 중…";
             text = "Wi-Fi를 만드는 중이에요";

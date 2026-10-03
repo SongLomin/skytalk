@@ -137,9 +137,11 @@ function render(s) {
     stEl.querySelector('span').textContent = p2p === 'on' ? '방이 열려 있어요' : p2p === 'starting' ? 'Wi-Fi 만드는 중…' : '채팅 서버만 켜져 있어요';
     $('#liveTitle').textContent = '내가 방장이에요';
     const port = host.port || 8080;
+    const lan = (host.urls || []).filter(u => !/\/\/127\./.test(u));
+    const p2pUrl = lan.find(u => /\/\/192\.168\.49\./.test(u)) || lan[0] || 'http://192.168.49.1:' + port;
     if (p2p === 'on') {
       $('#liveLead').textContent = '팀원에게 아래 정보를 알려 주세요. 채팅 화면의 QR 버튼으로도 보여 줄 수 있어요.';
-      kv($('#liveInfo'), [['Wi-Fi', host.ssid], ['비밀번호', host.pass], ['주소', 'http://192.168.49.1:' + port]]);
+      kv($('#liveInfo'), [['Wi-Fi', host.ssid], ['비밀번호', host.pass], ['주소', p2pUrl]]);
     } else if (p2p === 'starting' || !host.running) {
       $('#liveLead').textContent = '잠시만 기다려 주세요.';
       kv($('#liveInfo'), [['상태', host.error || '준비 중', false]]);

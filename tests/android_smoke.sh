@@ -32,6 +32,12 @@ if [ "$ok" != 1 ]; then
   exit 1
 fi
 
+# Wi-Fi Direct가 켜진 뒤의 주소 목록 (192.168.49.x 가 있어야 함)
+sleep 6
+curl -fsS --max-time 3 http://127.0.0.1:18080/api/info > "$OUT/info-after.json" || true
+echo "info after Wi-Fi Direct: $(cat "$OUT/info-after.json" 2>/dev/null)"
+if grep -q '192.168.49.' "$OUT/info-after.json"; then echo '  ok   Wi-Fi Direct address 192.168.49.x is up'; else echo '  note Wi-Fi Direct address not found (emulator may not support it)'; fi
+
 # 3) 노트북 서버와 같은 API 테스트를 안드로이드 서버에 실행
 python3 tests/api_test.py url http://127.0.0.1:18080 | tee "$OUT/api-test.txt"
 rc=${PIPESTATUS[0]}

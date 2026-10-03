@@ -1,0 +1,36 @@
+== server at http://127.0.0.1:18080
+  ok   GET / serves the chat page
+  ok   page content type is HTML
+  ok   /api/info answers
+  ok   /api/info lists urls
+  ok   poll returns room id
+  ok   join notice for A
+  ok   A listed as member
+  ok   seat is cleaned to upper case
+  ok   A sends a message
+  ok   waiting poll of B wakes up quickly (1.01s)
+  ok   B receives the exact text (quotes, newline, emoji)
+  ok   message carries name and seat
+  ok   resend with the same cid is deduplicated
+  ok   no duplicate message delivered
+  ok   message without a name is rejected
+  ok   too long message is rejected
+  ok   empty message is rejected
+  ok   bad uid is rejected
+  ok   bad image id is rejected
+  ok   broken JSON is rejected
+  ok   PNG upload accepted
+  ok   uploaded image served back
+  ok   non-image upload rejected
+  ok   missing image is 404
+  ok   message with image accepted
+  ok   image message delivered
+  ok   A learns B's read position
+  ok   read update wakes waiting pollers (1.64s)
+  ok   rename notice
+  ok   first load is capped to 300 messages
+  ok   gap flag set when history is cut
+  ok   6 parallel waiters all receive the message
+  ok   idle poll returns after about 20s (20.0s)
+
+RESULT: PASS (0 failures)

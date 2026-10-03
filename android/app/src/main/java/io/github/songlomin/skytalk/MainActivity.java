@@ -121,7 +121,7 @@ public class MainActivity extends Activity {
         if (i == null) return false;
         if ("host".equals(i.getStringExtra("autostart"))) {   // 자동 테스트용: 권한 확인 없이 바로 방 열기
             i.removeExtra("autostart");
-            startHostService();
+            startHostService(false);
             web.loadUrl(START);
             return true;
         }
@@ -224,14 +224,14 @@ public class MainActivity extends Activity {
             emit("{\"type\":\"wifiOff\"}");
             return;
         }
-        withPermissions(true, this::startHostService);
+        withPermissions(true, () -> startHostService(true));
     }
 
-    private void startHostService() {
+    private void startHostService(boolean askBattery) {
         stopService(new Intent(this, ClientService.class));
         unbindNetwork();
         startForegroundService(new Intent(this, HostService.class));
-        askBatteryExemptionOnce();
+        if (askBattery) askBatteryExemptionOnce();
         pushStatus();
     }
 

@@ -640,6 +640,19 @@ $('#pfForm').addEventListener('submit', e => {
   renderAll(); kickPoll(); flushOutbox(); refreshMenu(); reportProfile();
 });
 $('#pfName').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); $('#pfSeat').focus(); } });
+$('#pfSeat').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
+  e.preventDefault();
+  const f = $('#pfForm');
+  if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { cancelable: true }));
+});
+// 창(대화상자)이 열려 있는 동안 뒤 화면은 눌리거나 키보드로 선택되지 않게
+function syncInert() {
+  const open = Array.from(document.querySelectorAll('.dlg')).some(d => !d.hidden) || !$('#viewer').hidden;
+  $('#app').inert = open;
+}
+const inertWatch = new MutationObserver(syncInert);
+document.querySelectorAll('.dlg, #viewer').forEach(d => inertWatch.observe(d, { attributes: true, attributeFilter: ['hidden'] }));
 
 $('#btnPeople').addEventListener('click', () => { show('#dlgPeople'); renderPeople(); });
 

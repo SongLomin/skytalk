@@ -1,0 +1,59 @@
+ACTIVITY MANAGER SERVICES (dumpsys activity services)
+  User 0 active services:
+  * ServiceRecord{87a2d u0 io.github.songlomin.skytalk/.HostService}
+    intent={cmp=io.github.songlomin.skytalk/.HostService}
+    packageName=io.github.songlomin.skytalk
+    processName=io.github.songlomin.skytalk
+    baseDir=/data/app/~~UobLd0viM3tndljfRJbPjg==/io.github.songlomin.skytalk-OeZqu1ClDOOk-5i8xyA-nA==/base.apk
+    dataDir=/data/user/0/io.github.songlomin.skytalk
+    app=ProcessRecord{331ef8a 2545:io.github.songlomin.skytalk/u0a192}
+    mAllowWhileInUsePermissionInFgsReason=PROC_STATE_TOP
+    allowUiJobScheduling=true
+    recentCallingPackage=io.github.songlomin.skytalk
+    recentCallingUid=10192
+    allowStartForeground=PROC_STATE_TOP
+    startForegroundCount=1
+    infoAllowStartForeground=[callingPackage: io.github.songlomin.skytalk; callingUid: 10192; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=io.github.songlomin.skytalk/.HostService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:34; callerTargetSdkVersion:34; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+    isForeground=true foregroundId=1 types=40000000 foregroundNoti=Notification(channel=service shortcut=null contentView=null vibrate=null sound=null defaults=0x0 flags=0x6a color=0x00000000 actions=1 vis=PRIVATE)
+    createTime=-59s891ms startingBgTimeout=--
+    lastActivity=-59s890ms restartTime=-59s890ms createdFromFg=true
+    startRequested=true delayedStop=false stopIfKilled=false callStart=true lastStartId=1
+ startCommandResult=1
+
+  * ServiceRecord{c62ab u0 io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0}
+    intent={cmp=io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0}
+    packageName=io.github.songlomin.skytalk
+    processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+    baseDir=/data/app/~~Ox62Wi5199v-mpNt3QJbqQ==/com.google.android.webview-8tW4wDkh-aQSV7Gb2S8lcg==/WebViewGoogle.apk
+    dataDir=/data/user/0/com.google.android.webview
+    app=ProcessRecord{4c0551c 2727:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a192i0}
+    isolationHostProc=ProcessRecord{4c0551c 2727:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a192i0}
+    mAllowWhileInUsePermissionInFgsReason=PROC_STATE_TOP
+    allowUiJobScheduling=false
+    recentCallingPackage=io.github.songlomin.skytalk
+    recentCallingUid=10192
+    allowStartForeground=PROC_STATE_TOP
+    startForegroundCount=0
+    infoAllowStartForeground=[callingPackage: io.github.songlomin.skytalk; callingUid: 10192; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0 (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:34; callerTargetSdkVersion:34; startForegroundCount:0; bindFromPackage:null: isBindService:true]
+    createTime=-1m9s191ms startingBgTimeout=--
+    lastActivity=-1m6s877ms restartTime=-1m7s846ms createdFromFg=true
+    Bindings:
+    * IntentBindRecord{2c6c28e CREATE}:
+      intent={cmp=io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0}
+      binder=android.os.BinderProxy@5bc4aaf
+      requested=true received=true hasBound=true doRebind=false
+      * Client AppBindRecord{2474ebc ProcessRecord{331ef8a 2545:io.github.songlomin.skytalk/u0a192}}
+        Per-process Connections:
+          ConnectionRecord{df08df9 u0 CR IMP io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0:@5a43cc0 flags=0x80000041}
+          ConnectionRecord{e184b52 u0 CR WPRI io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0:@373a3dd flags=0x80000021}
+    All Connections:
+      ConnectionRecord{e184b52 u0 CR WPRI io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0:@373a3dd flags=0x80000021}
+      ConnectionRecord{df08df9 u0 CR IMP io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0:@5a43cc0 flags=0x80000041}
+
+  Connection bindings to services:
+  * ConnectionRecord{e184b52 u0 CR WPRI io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0:@373a3dd flags=0x80000021}
+    binding=AppBindRecord{2474ebc io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0:io.github.songlomin.skytalk}
+    conn=android.os.BinderProxy@373a3dd flags=0x80000021
+  * ConnectionRecord{df08df9 u0 CR IMP io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0:@5a43cc0 flags=0x80000041}
+    binding=AppBindRecord{2474ebc io.github.songlomin.skytalk/org.chromium.content.app.SandboxedProcessService0:0:io.github.songlomin.skytalk}
+    conn=android.os.BinderProxy@5a43cc0 flags=0x80000041

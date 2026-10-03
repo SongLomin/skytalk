@@ -10,6 +10,7 @@
 import base64
 import pathlib
 import shutil
+import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parent
 SRC = ROOT / "src"
@@ -69,6 +70,24 @@ def main():
     bat = (BAT_HEADER + ps).replace("\r\n", "\n")
     assert all(ord(c) < 128 for c in BAT_HEADER), "batch header must be ASCII"
     (DIST / "SkyTalk-Windows.bat").write_bytes(bat.replace("\n", "\r\n").encode("utf-8"))
+
+    # 브라우저의 .bat 다운로드 경고를 피하려고 zip도 만듭니다.
+    readme = (
+        "기내톡 (SkyTalk) - Windows 방장용\r\n\r\n"
+        "1. 비행기 모드를 켜고 Wi-Fi만 다시 켜세요. (아무 Wi-Fi에도 연결하지 않아도 돼요)\r\n"
+        "2. SkyTalk-Windows.bat 을 더블클릭하세요.\r\n"
+        "   - \"Windows의 PC 보호\" 창 → [추가 정보] → [실행]\r\n"
+        "   - 관리자 권한을 물으면 → [예]\r\n"
+        "3. 검은 창에 나온 Wi-Fi 이름·비밀번호·주소를 팀원에게 알려 주세요.\r\n"
+        "   팀원: 그 Wi-Fi에 연결 → Safari/Chrome 주소창에 주소 입력 → 이름 입력\r\n"
+        "4. 노트북 덮개는 닫지 말고 화면만 어둡게 해 두세요. (덮으면 절전으로 꺼질 수 있어요)\r\n\r\n"
+        "Wi-Fi 이름·비밀번호 바꾸기: SkyTalk-Windows.bat 을 메모장으로 열어 맨 위\r\n"
+        "SKYTALK_SSID, SKYTALK_PASS 를 고치세요. (비밀번호 8자 이상)\r\n\r\n"
+        "자세한 안내: https://songlomin.github.io/skytalk/\r\n"
+    )
+    with zipfile.ZipFile(DIST / "SkyTalk-Windows.zip", "w", zipfile.ZIP_DEFLATED) as z:
+        z.write(DIST / "SkyTalk-Windows.bat", "SkyTalk/SkyTalk-Windows.bat")
+        z.writestr("SkyTalk/README-KO.txt", "﻿" + readme)
 
     shutil.copyfile(SRC / "client.html", DIST / "client.html")
     if ANDROID_ASSETS.parent.exists():
