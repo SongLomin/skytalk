@@ -63,7 +63,7 @@ def main():
     (DIST / "skytalk.py").write_text(py, encoding="utf-8", newline="\n")
 
     # Windows (.bat = 배치 머리말 + PowerShell 본문)
-    ps = (SRC / "server.ps1").read_text(encoding="utf-8")
+    ps = (SRC / "server.ps1").read_text(encoding="utf-8-sig")  # src는 PS 5.1에서 바로 열 수 있게 BOM 포함
     assert ps.count("$HtmlB64 = ''") == 1, "server.ps1 marker"
     assert "#>" not in ps, "server.ps1 must not contain '#>' (it would end the launcher comment)"
     ps = ps.replace("$HtmlB64 = ''", "$HtmlB64 = '" + b64 + "'")

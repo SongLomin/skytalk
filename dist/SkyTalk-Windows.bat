@@ -522,6 +522,8 @@ function Start-MobileHotspot([string]$ssid, [string]$pass) {
     if ([string]$tm.TetheringOperationalState -ne 'On') {
       $cfg = $tm.GetCurrentAccessPointConfiguration()
       if ($cfg.Ssid -cne $ssid -or $cfg.Passphrase -cne $pass) {
+        # 끝날 때 원래 모바일 핫스팟 이름·비밀번호로 되돌리기 위해 기억해 둡니다.
+        $script:OldApSsid = $cfg.Ssid; $script:OldApPass = $cfg.Passphrase
         $cfg.Ssid = $ssid; $cfg.Passphrase = $pass
         Await-Action ($tm.ConfigureAccessPointAsync($cfg))
       }
@@ -548,8 +550,47 @@ function Stop-Hotspots {
   if ($script:Publisher) { try { $script:Publisher.Stop() } catch { }; $script:Publisher = $null }
   if ($script:Tethering) {
     try { Get-WinRtAwaiters; [void](Await-Op ($script:Tethering.StopTetheringAsync()) ([Windows.Networking.NetworkOperators.NetworkOperatorTetheringOperationResult])) } catch { }
+    if ($script:OldApSsid) {
+      try {
+        $cfg = $script:Tethering.GetCurrentAccessPointConfiguration()
+        $cfg.Ssid = $script:OldApSsid; $cfg.Passphrase = $script:OldApPass
+        Await-Action ($script:Tethering.ConfigureAccessPointAsync($cfg))
+      } catch { }
+    }
     $script:Tethering = $null
   }
+}
+
+# 지금 연결돼 있는 Wi-Fi 이름 (없으면 빈 문자열)
+function Get-WlanProfileName {
+  try {
+    $null = [Windows.Networking.Connectivity.NetworkInformation, Windows.Networking.Connectivity, ContentType = WindowsRuntime]
+    foreach ($cp in [Windows.Networking.Connectivity.NetworkInformation]::GetConnectionProfiles()) {
+      if ($cp.IsWlanConnectionProfile -and [string]$cp.GetNetworkConnectivityLevel() -ne 'None') { return [string]$cp.ProfileName }
+    }
+  } catch { }
+  return ''
+}
+
+# 예/아니요 묻기. 정해진 시간 안에 답이 없으면 기본값으로 진행합니다.
+function Ask-YesNo([string]$question, [int]$seconds, [bool]$default) {
+  $hint = '아니요'; if ($default) { $hint = '예' }
+  Write-Host ("{0} [Y/N] ({1}초 뒤 자동으로 {2}) " -f $question, $seconds, $hint) -ForegroundColor Yellow -NoNewline
+  $answer = $default
+  try {
+    $sw = [Diagnostics.Stopwatch]::StartNew()
+    while ($sw.Elapsed.TotalSeconds -lt $seconds) {
+      if ([Console]::KeyAvailable) {
+        $k = [Console]::ReadKey($true)
+        if ($k.Key -eq 'Y') { $answer = $true; break }
+        if ($k.Key -eq 'N') { $answer = $false; break }
+        if ($k.Key -eq 'Enter') { break }
+      }
+      Start-Sleep -Milliseconds 100
+    }
+  } catch { }
+  if ($answer) { Write-Host '예' } else { Write-Host '아니요' }
+  return $answer
 }
 
 # ---------------- 시작 ----------------
@@ -571,17 +612,39 @@ Load-Room
 # 1) 핫스팟
 if (-not $NoHotspot) {
   if ($Pass.Length -lt 8) { Say '  ! Wi-Fi 비밀번호는 8자 이상이어야 해요. 기본값(skytalk1234)으로 바꿉니다.' 'Yellow'; $Pass = 'skytalk1234' }
-  Say '  - 노트북 Wi-Fi로 핫스팟을 켜는 중… (최대 20초)' 'Gray'
-  $hs = Start-WifiDirectAp $Ssid $Pass
-  if ($hs.ok) {
-    $script:HotspotKind = 'Wi-Fi Direct'; $script:WifiSsid = $Ssid; $script:WifiPass = $Pass; $script:HotspotIp = $hs.ip
-  } else {
-    Say ('    (Wi-Fi Direct 방식 실패: ' + $hs.error + ') → Windows 모바일 핫스팟으로 다시 시도') 'DarkYellow'
-    $hs2 = Start-MobileHotspot $Ssid $Pass
-    if ($hs2.ok) {
-      $script:HotspotKind = '모바일 핫스팟'; $script:WifiSsid = $hs2.ssid; $script:WifiPass = $hs2.pass; $script:HotspotIp = $hs2.ip
+  $wlan = Get-WlanProfileName
+  $done = $false
+  if ($wlan) {
+    # 다른 Wi-Fi(호텔·기내 Wi-Fi 등)에 연결된 채로 Wi-Fi Direct 핫스팟을 켜면, 노트북에 따라 팀원 폰이
+    # 접속하지 못하는 문제가 있어요. 이때는 그 연결을 나눠 쓰는 Windows 모바일 핫스팟이 안정적입니다.
+    Say ("  - 이 노트북은 지금 Wi-Fi '{0}'에 연결돼 있어요 → 모바일 핫스팟으로 켜는 중…" -f $wlan) 'Gray'
+    $hs = Start-MobileHotspot $Ssid $Pass
+    if ($hs.ok) {
+      $script:HotspotKind = '모바일 핫스팟'; $script:WifiSsid = $hs.ssid; $script:WifiPass = $hs.pass; $script:HotspotIp = $hs.ip; $done = $true
     } else {
-      Say ('    (모바일 핫스팟도 실패: ' + $hs2.error + ')') 'DarkYellow'
+      Say ('    (모바일 핫스팟 실패: ' + $hs.error + ')') 'DarkYellow'
+      Say ("  ! Wi-Fi '{0}'에 연결된 채로는 팀원 폰이 접속하지 못할 수 있어요." -f $wlan) 'Yellow'
+      if (Ask-YesNo ("    Wi-Fi '{0}' 연결을 끊고 계속할까요?" -f $wlan) 12 $true) {
+        & netsh wlan disconnect 2>$null | Out-Null
+        Wait-Ms 2500
+      }
+    }
+  }
+  if (-not $done) {
+    Say '  - 노트북 Wi-Fi로 핫스팟을 켜는 중… (최대 20초)' 'Gray'
+    $hs = Start-WifiDirectAp $Ssid $Pass
+    if ($hs.ok) {
+      $script:HotspotKind = 'Wi-Fi Direct'; $script:WifiSsid = $Ssid; $script:WifiPass = $Pass; $script:HotspotIp = $hs.ip
+    } elseif (-not $wlan) {
+      Say ('    (Wi-Fi Direct 방식 실패: ' + $hs.error + ') → Windows 모바일 핫스팟으로 다시 시도') 'DarkYellow'
+      $hs2 = Start-MobileHotspot $Ssid $Pass
+      if ($hs2.ok) {
+        $script:HotspotKind = '모바일 핫스팟'; $script:WifiSsid = $hs2.ssid; $script:WifiPass = $hs2.pass; $script:HotspotIp = $hs2.ip
+      } else {
+        Say ('    (모바일 핫스팟도 실패: ' + $hs2.error + ')') 'DarkYellow'
+      }
+    } else {
+      Say ('    (Wi-Fi Direct 방식 실패: ' + $hs.error + ')') 'DarkYellow'
     }
   }
 }
